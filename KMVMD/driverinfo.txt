@@ -1,0 +1,47 @@
+Driver handle:
+    Path: \\.\cdrom213
+    Opened With: kernel32!CreateFileW
+
+    CreateFileW:
+        lpFileName: \\.\cdrom213
+        dwDesiredAccess: GENERIC_READ | GENERIC_WRITE (0x80000000 | 0x40000000)
+        dwShareMode: 0
+        lpSecurityAttributes: NoneType/NULL
+        dwCreationDisposition: OPEN_EXISTING (3)
+        dwFlagsAndAttributes: FILE_ATTRIBUTE_NORMAL (80)
+        hTemplateFile: NoneType/NULL
+
+        WinAPI:
+            Python: kernel32.CreateFileW("\\\\.\\cdrom213", 0x80000000 | 0x40000000, 0, None, 3, 80, None)
+            C/C++: CreateFileW(L"\\\\.\\cdrom213", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+Driver instruction code:
+    Type: IOCTL
+    Full code: 0x1fb33534 (531838260)
+    Device Type: 0x1fb3 (8115)
+    Function: 0xd4d (3405)
+    Access: 0x0 (0)
+    Method: 0x0 (0)
+
+    Report Data:
+        Values:
+            MouseDeltaX: int32
+            MouseDeltaY: int32
+            MouseButtonMask: int32
+        
+        Bytes:
+            Full Raw Zerod: \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
+            Full Raw Zerod Split: \x00\x00\x00\x00\ | x00\x00\x00\x00 | \x00\x00\x00\x00
+            MouseDeltaX: Bytes[0:4], little endian
+            MouseDeltaY: Bytes[4:8], little endian
+            MouseButtonMask: Bytes[8:12], little endian
+
+        Struct:
+            Python: DriverReportStruct = struct.pack("3i", MouseDeltaX, MouseDeltaY, MouseButtonMask)
+            C/C++: struct DriverReportStruct{int MouseDeltaX; int MouseDeltaY; int MouseButtonMask;};
+
+    WinAPI:
+        Python: kernel32.DeviceIoControl(DriverHandle, 0x1fb33534, DriverReportStruct, len(DriverReportStruct), None, 0, ctypes.byref(BytesReturnedBuffer), None)
+        C/C++: DeviceIoControl(DriverHandle, 0x1fb33534, &DriverReportStruct, sizeof(DriverReportStruct), NULL, 0, &BytesReturnedBuffer, NULL);
+
+
