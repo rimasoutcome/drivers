@@ -1,0 +1,46 @@
+Driver handle:
+    Path: \\.\SecScanGuard
+    Opened With: kernel32!CreateFileW
+
+    CreateFileW:
+        lpFileName: \\.\SecScanGuard
+        dwDesiredAccess: GENERIC_READ | GENERIC_WRITE (0x80000000 | 0x40000000)
+        dwShareMode: 0
+        lpSecurityAttributes: NoneType/NULL
+        dwCreationDisposition: OPEN_EXISTING (3)
+        dwFlagsAndAttributes: FILE_ATTRIBUTE_NORMAL (80)
+        hTemplateFile: NoneType/NULL
+
+        WinAPI:
+            Python: Kernel32.CreateFileW("\\\\.\\SecScanGuard", 0x80000000 | 0x40000000, 0, None, 3, 0x80, None)
+            C/C++: CreateFileW(L"\\\\.\\SecScanGuard", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+Driver instruction code:
+    Type: IOCTL
+    Full code: 0x222014 (2236436)
+    Device Type: 0x22 (8115)
+    Function: 0x805 (2053)
+    Access: 0x0 (0)
+    Method: 0x0 (0)
+
+    Report Data:
+        Values:
+            AccessKey: uint64 (0x15AA3FE2C9D or \x9d\x2c\xfe\xa3\x5a\x01\x00\x00)
+            MouseDeltaX: int32
+            MouseDeltaY: int32
+            MouseButtonMask: int32
+        
+        Bytes:
+            Size: 88
+            AccessKey: Bytes[0:8], little endian
+            MouseButtonMask: Bytes[76:80], little endian
+            MouseDeltaX: Bytes[80:84], little endian
+            MouseDeltaY: Bytes[84:88], little endian
+
+        Struct:
+            Python: DriverReportStruct = (ctypes.c_ubyte * 88)()
+
+    WinAPI:
+        Python: Kernel32.DeviceIoControl(DriverHandle, 0x222014, ctypes.byref(DriverReportStruct), ctypes.sizeof(DriverReportStruct), None, 0, ctypes.byref(ctypes.c_size_t()), None)
+        C/C++: DeviceIoControl(DriverHandle, 0x222014, &DriverReportStruct, sizeof(DriverReportStruct), NULL, 0, &BytesReturnedBuffer, NULL);
+
