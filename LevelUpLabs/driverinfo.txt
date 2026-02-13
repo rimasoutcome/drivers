@@ -1,0 +1,49 @@
+literally just a interception driver base
+https://github.com/oblitum/Interception
+
+Driver handle:
+    Path: \\.\interception11
+    Opened With: kernel32!CreateFileW
+
+    CreateFileW:
+        lpFileName: \\.\interception11
+        dwDesiredAccess: GENERIC_READ | GENERIC_WRITE (0x80000000 | 0x40000000)
+        dwShareMode: 0
+        lpSecurityAttributes: NoneType/NULL
+        dwCreationDisposition: OPEN_EXISTING (3)
+        dwFlagsAndAttributes: FILE_ATTRIBUTE_NORMAL (80)
+        hTemplateFile: NoneType/NULL
+
+        WinAPI:
+            Python: ernel32.CreateFileW("\\\\.\\interception11", 0x80000000 | 0x40000000, 0, None, 3, 0x80, None)
+            C/C++: CreateFileW(L"\\\\.\\interception11", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+Driver instruction code:
+    Type: IOCTL
+    Full code: 0x222080 (2236544)
+    Device Type: 0x22 (8115)
+    Function: 0x820 (3405)
+    Access: 0x0 (0)
+    Method: 0x0 (0)
+
+    Report Data:
+        Values:
+            MouseDeltaX: int32
+            MouseDeltaY: int32
+            MouseButtonMask: int32
+        
+        Bytes:
+            Full Raw Zerod: \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
+            Full Raw Zerod Split: \x00\x00\x00\x00\ | x00\x00\x00\x00 | \x00\x00\x00\x00 | \x00\x00\x00\x00 | \x00\x00\x00\x00
+            MouseButtonMask: Bytes[4:8], little endian
+            MouseDeltaX: Bytes[8:12], little endian
+            MouseDeltaY: Bytes[16:20], little endian
+
+        Struct:
+            Python: DriverReportStruct = struct.pack("5i", 0, MouseButtonMask, MouseDeltaX, MouseDeltaY, 0)
+            C/C++: struct DriverReportStruct{0; int MouseButtonMask; int MouseDeltaX; int MouseDeltaB; 0;};
+
+    WinAPI:
+        Python: kernel32.DeviceIoControl(DriverHandle, 0x222080, ctypes.byref(DriverReportStruct), ctypes.sizeof(DriverReportStruct), None, 0, ctypes.byref(ctypes.c_ulong()), None)
+        C/C++: DeviceIoControl(DriverHandle, 0x222080, &DriverReportStruct, sizeof(DriverReportStruct), NULL, 0, &BytesReturnedBuffer, NULL);
+
